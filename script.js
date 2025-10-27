@@ -11,6 +11,7 @@ let upg1Cost = 25;
 let upg2Cost = 50;
 let upg3Cost = 100;
 let upg4Cost = 500;
+
 let upgCount = 0;
 
 let achievementsArray = [];
@@ -28,6 +29,8 @@ const playerData = {
   achievement4: false
 }
 
+achievementsList.innerHTML = "Achievements:<br>";
+
 function initGame() {
   clickCount.innerHTML = `clicks: ${playerData.clicks}`;
   loadData();
@@ -41,7 +44,7 @@ function loadData() {
   const saveData = localStorage.getItem("playerData");
   if (saveData) {
     const saved = JSON.parse(saveData);
-    playerData.clicks = saved.clicks || 0;
+    playerData.clicks = saved.clicks || 99;
     playerData.upg1Lvl = saved.upg1Lvl || 0;
     playerData.upg2Lvl = saved.upg2Lvl || 0;
     playerData.upg3Lvl = saved.upg3Lvl || 0;
@@ -69,25 +72,26 @@ function update() {
   saveData();
 }
 function achievements() {
-  if (playerData.clicks >= 100 && playerData.achievement1 != true) {
-    playerData.achievement1 = true;
-    playerData.achievementsArray.push("Have 100 clicks<br>");
+  if (playerData.clicks >= 100 && !playerData.achievementsArray.includes("Get 100 clicks<br>")) {
+    playerData.achievementsArray.push("Get 100 clicks<br>");
+    redrawAchievements();
   }
-  if (playerData.clicks >= 1000 && playerData.achievement2 != true) {
-    playerData.achievement2 = true;
-    playerData.achievementsArray.push("Have 1,000 clicks<br>");
+  if (playerData.clicks >= 1000 && !playerData.achievementsArray.includes("Get 1,000 clicks<br>")) {
+    playerData.achievementsArray.push("Get 1,000 clicks<br>");
+    redrawAchievements();
   }
-  if (upgCount >= 10 && playerData.achievement3 != true) {
-    playerData.achievement3 = true;
+  if (upgCount >= 10 && !playerData.achievementsArray.includes("Buy 10 upgrades<br>")) {
     playerData.achievementsArray.push("Buy 10 upgrades<br>");
+    redrawAchievements();
   }
-  if (playerData.clicks >= 10000 && playerData.achievement4 != true) {
-    playerData.achievement4 = true;
-    playerData.achievementsArray.push("Have 10,000 clicks<br>");
+  if (playerData.clicks >= 10000 && !playerData.achievementsArray.includes("Get 10,000 clicks<br>")) {
+    playerData.achievementsArray.push("Get 10,000 clicks<br>");
+    redrawAchievements();
   }
-  
+}
+function redrawAchievements() {
   achievementsList.innerHTML = "Achievements:<br>";
-  for (let i=0;i<=playerData.achievementsArray.length-1;i++) {
+  for (let i = 0; i < playerData.achievementsArray.length; i++) {
     achievementsList.innerHTML += playerData.achievementsArray[i];
   }
 }
@@ -130,6 +134,7 @@ function upg2Button() {
     update();
   }
 }
+
 function upg3Button() {
   if (playerData.clicks >= upg3Cost){
     playerData.clicks -= upg3Cost;
@@ -158,7 +163,7 @@ function cpsCalc() {
 function clearSaveData() {
   const clearData = prompt("Are you sure?\nIf so type \"yes\"");
   if (clearData.toLowerCase().trim() == "yes") {
-    playerData.clicks = 0;
+    playerData.clicks = 99;
     playerData.upg1Lvl = 1;
     playerData.upg2Lvl = 0;
     playerData.upg3Lvl = 0;
