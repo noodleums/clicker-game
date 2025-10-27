@@ -41,7 +41,7 @@ function loadData() {
   const saveData = localStorage.getItem("playerData");
   if (saveData) {
     const saved = JSON.parse(saveData);
-    playerData.clicks = saved.clicks || 99;
+    playerData.clicks = saved.clicks || 0;
     playerData.upg1Lvl = saved.upg1Lvl || 0;
     playerData.upg2Lvl = saved.upg2Lvl || 0;
     playerData.upg3Lvl = saved.upg3Lvl || 0;
