@@ -105,7 +105,7 @@ function rebirthProgress() {
   }
 }
 function rebirthing() {
-  playerData.clicks = 30032;
+  playerData.clicks = 0;
   playerData.upg1Lvl = 1;
   playerData.upg2Lvl = 0;
   playerData.upg3Lvl = 0;
