@@ -5,10 +5,11 @@ const upg2 = document.getElementById("upgrade2");
 const upg3 = document.getElementById("upgrade3");
 const upg4 = document.getElementById("upgrade4");
 const achievementsList = document.getElementById("achievements");
-const debug1 = document.getElementById("debug1");
 const rebirthCount = document.getElementById("rebirthCount");
 const rebirthB = document.getElementById("rebirth");
 const rebirthPro = document.getElementById("rebirthProgress");
+const rebirthAmoDisp = document.getElementById("rebirthAmo");
+const messageDisp = document.getElementById("message");
 
 let upg1Cost = 25;
 let upg2Cost = 50;
@@ -18,6 +19,8 @@ let upg4Cost = 500;
 let upgCount = 0;
 
 let achievementsArray = [];
+
+let rebirthCost = 100000;
 
 const playerData = {
   clicks: 0,
@@ -43,6 +46,18 @@ function initGame() {
 function saveData() {
   localStorage.setItem("playerData", JSON.stringify(playerData));
 }
+
+let fadeTimer = null;
+setInterval(function() {
+  messageDisp.innerHTML = "Game Saved";
+  saveData();
+  messageDisp.classList.add("visible");
+  clearTimeout(fadeTimer);
+  fadeTimer = setTimeout(function() {
+    messageDisp.classList.remove("visible");
+  }, 1500);
+},30000)
+
 function loadData() {
   const saveData = localStorage.getItem("playerData");
   if (saveData) {
@@ -64,6 +79,7 @@ function update() {
   upgCount = (playerData.upg1Lvl-1)+playerData.upg2Lvl+playerData.upg3Lvl+playerData.upg4Lvl;
   clickCount.innerHTML = `clicks: ${playerData.clicks.toFixed(2)}`;
   rebirthCount.innerHTML = `rebirths: ${playerData.rebirths}`;
+  rebirthAmoDisp.innerHTML = `To Next Rebirth: ${(rebirthCost - playerData.clicks).toFixed(2)}`;
   cpsCount.innerHTML = `clicks per second: ${playerData.upg2Lvl+(playerData.upg3Lvl*10)+(playerData.upg4Lvl*50)}`;
   upg1.innerHTML = `${playerData.upg1Lvl} clicks per click<br>cost to upgrade: ${upg1Cost}`;
   upg2.innerHTML = `${playerData.upg2Lvl} clicks/s<br>cost to upgrade: ${upg2Cost}`;
@@ -72,45 +88,31 @@ function update() {
   rebirthF();
   rebirthProgress();
   achievements();
-  saveData();
 }
 function rebirthF() {
-  if (playerData.rebirths == 0 && playerData.clicks >= 100000) {
+  rebirthCost = 50000 + (playerData.rebirths ** 4) * 1000;
+  if (playerData.clicks >= rebirthCost) {
     rebirthB.innerHTML = "Rebirth"
     rebirthB.style.visibility = "visible";
-    rebirthB.addEventListener("click", function() {
-      rebirthing();
-      playerData.rebirths = 1;
-      rebirthB.style.visibility = "hidden";
-    });
-  }
-  if (playerData.rebirths == 1 && playerData.clicks >= 500000) {
-    rebirthB.innerHTML = "Rebirth"
-    rebirthB.style.visibility = "visible";
-    rebirthB.addEventListener("click", function() {
-      rebirthing();
-      playerData.rebirths = 2;
-      rebirthB.style.visibility = "hidden";
-    });
+    rebirthB.addEventListener("click", rebirthReset);
   }
 }
 function rebirthProgress() {
-  if (playerData.rebirths == 0) {
-    rebirthPro.max = 100000;
-    rebirthPro.value = playerData.clicks;
-  }
-  if (playerData.rebirths == 1) {
-    rebirthPro.max = 500000;
-    rebirthPro.value = playerData.clicks;
-  }
+  rebirthPro.max = rebirthCost;
+  rebirthPro.value = playerData.clicks;
 }
-function rebirthing() {
+function rebirthReset() {
+  rebirthB.removeEventListener("click", rebirthReset);
+  playerData.rebirths++;
+  saveData();
+  rebirthB.style.visibility = "hidden";
   playerData.clicks = 0;
   playerData.upg1Lvl = 1;
   playerData.upg2Lvl = 0;
   playerData.upg3Lvl = 0;
   playerData.upg4Lvl = 0;
 }
+
 function achievements() {
   if (playerData.clicks >= 100 && !playerData.achievementsArray.includes("Get 100 clicks<br>")) {
     playerData.achievementsArray.push("Get 100 clicks<br>");
@@ -142,9 +144,11 @@ function redrawAchievements() {
   for (let i = 0; i < playerData.achievementsArray.length; i++) {
     achievementsList.innerHTML += playerData.achievementsArray[i];
   }
+  saveData();
 }
 function onButtonClick() {
-  playerData.clicks += playerData.upg1Lvl;
+  let clickCalc = playerData.upg1Lvl + (playerData.upg1Lvl*(playerData.rebirths/10))
+  playerData.clicks += clickCalc;
   saveData();
   update();
 }
@@ -204,7 +208,6 @@ function cpsCalc() {
   setInterval(function() {
     let cps = (playerData.upg2Lvl+(playerData.upg3Lvl*10)+(playerData.upg4Lvl*50));
     playerData.clicks += cps + (cps*(playerData.rebirths/10));
-    saveData();
     update();
   }, 1000);
 }
@@ -227,5 +230,7 @@ function clearSaveData() {
     location.reload();
   }
 }
-
+window.addEventListener('beforeunload', (event) => {
+  saveData();
+});
 document.addEventListener('DOMContentLoaded', initGame);
